@@ -33,7 +33,7 @@ jobs:
     name: Deploy to Dev
     needs: build_and_test
     runs-on: ubuntu-latest
-    environment: development
+    environment: dev
     steps:
       - name: SSH Deployment
         uses: appleboy/ssh-action@master
@@ -58,6 +58,6 @@ jobs:
     name: Deploy to Prod
     needs: deploy_test
     runs-on: ubuntu-latest
-    environment: production
+    environment: prod
     steps:
       - run: echo "Deploying to Production environment..."
