@@ -33,6 +33,8 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          timeout: 60s
+          command_timeout: 10m
           script: |
             mkdir -p ~/apps/zamadev-dev
             cd ~/apps/zamadev-dev
@@ -52,12 +54,16 @@ jobs:
     runs-on: ubuntu-latest
     environment: test
     steps:
+      - name: Wait for server to breathe
+        run: sleep 30
       - name: SSH Deployment
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          timeout: 60s
+          command_timeout: 10m
           script: |
             mkdir -p ~/apps/zamadev-test
             cd ~/apps/zamadev-test
@@ -77,12 +83,16 @@ jobs:
     runs-on: ubuntu-latest
     environment: prod
     steps:
+      - name: Wait for server to breathe
+        run: sleep 30
       - name: SSH Deployment
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          timeout: 60s
+          command_timeout: 10m
           script: |
             mkdir -p ~/apps/zamadev-prod
             cd ~/apps/zamadev-prod
