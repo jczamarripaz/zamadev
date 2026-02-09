@@ -1,0 +1,12 @@
+services:
+  angular-app:
+    build:
+      context: .
+      args:
+        # Passes the environment type to the Dockerfile ARG
+        - ENV_CONFIGURATION=${ENV_NAME}
+    # Dynamic container name: zamadev-dev, zamadev-test, etc.
+    container_name: zamadev-${ENV_NAME}
+    ports:
+      - "${ENV_PORT}:80"
+    restart: always
