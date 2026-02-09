@@ -10,9 +10,18 @@ RUN npm install
 COPY . .
 
 # Argument to define which environment to build (dev, test, or prod)
-# Defaults to production if nothing is passed
 ARG ENV_CONFIGURATION=production
-RUN npm run build -- --configuration=$ENV_CONFIGURATION
+
+# dev  -> development
+# test -> test 
+# prod -> production
+RUN if [ "$ENV_CONFIGURATION" = "dev" ]; then \
+        npm run build -- --configuration=development; \
+    elif [ "$ENV_CONFIGURATION" = "test" ]; then \
+        npm run build -- --configuration=test; \
+    else \
+        npm run build -- --configuration=production; \
+    fi
 
 # Stage 2: Server (Nginx)
 FROM nginx:alpine
@@ -20,7 +29,6 @@ FROM nginx:alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy compiled files from the build stage
-# Note: The exact path depends on your angular.json (zamadev)
 COPY --from=build /app/dist/zamadev/browser /usr/share/nginx/html
 
 EXPOSE 80
