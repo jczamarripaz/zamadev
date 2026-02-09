@@ -21,20 +21,11 @@ jobs:
           npm run build
           npm test -- --watch=false
 
-  deploy:
-    name: Deploy to ${{ matrix.env }}
+  deploy_dev:
+    name: Deploy to Dev
     needs: build_and_test
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - env: dev
-            port: 3000
-          - env: test
-            port: 3001
-          - env: prod
-            port: 8080
-    environment: ${{ matrix.env }}
+    environment: dev
     steps:
       - name: SSH Deployment
         uses: appleboy/ssh-action@master
@@ -43,14 +34,64 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            mkdir -p ~/apps/zamadev-${{ matrix.env }}
-            cd ~/apps/zamadev-${{ matrix.env }}
+            mkdir -p ~/apps/zamadev-dev
+            cd ~/apps/zamadev-dev
             [ -d .git ] || git clone https://github.com/jczamarripaz/zamadev.git .
             git pull origin main
             
-            export PORT=${{ matrix.port }}
-            export CONTAINER_NAME=zamadev-${{ matrix.env }}
-            export ENV_NAME=${{ matrix.env }}
+            export PORT=3000
+            export CONTAINER_NAME=zamadev-dev
+            export ENV_NAME=dev
+            
+            docker compose build --build-arg ENV_CONFIGURATION=$ENV_NAME
+            docker compose up -d
+
+  deploy_test:
+    name: Deploy to Test
+    needs: deploy_dev
+    runs-on: ubuntu-latest
+    environment: test
+    steps:
+      - name: SSH Deployment
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            mkdir -p ~/apps/zamadev-test
+            cd ~/apps/zamadev-test
+            [ -d .git ] || git clone https://github.com/jczamarripaz/zamadev.git .
+            git pull origin main
+            
+            export PORT=3001
+            export CONTAINER_NAME=zamadev-test
+            export ENV_NAME=test
+            
+            docker compose build --build-arg ENV_CONFIGURATION=$ENV_NAME
+            docker compose up -d
+
+  deploy_prod:
+    name: Deploy to Prod
+    needs: deploy_test
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - name: SSH Deployment
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            mkdir -p ~/apps/zamadev-prod
+            cd ~/apps/zamadev-prod
+            [ -d .git ] || git clone https://github.com/jczamarripaz/zamadev.git .
+            git pull origin main
+            
+            export PORT=8080
+            export CONTAINER_NAME=zamadev-prod
+            export ENV_NAME=prod
             
             docker compose build --build-arg ENV_CONFIGURATION=$ENV_NAME
             docker compose up -d

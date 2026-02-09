@@ -8,9 +8,9 @@ services:
     expose:
       - "80"
     networks:
-      - proxy-network
+      - proxy_network
     restart: always
 
 networks:
-  proxy-network:
+  proxy_network:
     external: true
