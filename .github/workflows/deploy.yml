@@ -68,7 +68,7 @@ jobs:
             [ -d .git ] || git clone https://github.com/jczamarripaz/zamadev.git .
             git pull origin main
             export PORT=3001
-            export CONTAINER_NAME=zama-test
+            export CONTAINER_NAME=zamadev-test
             docker compose up -d --build
 
   deploy_prod:
