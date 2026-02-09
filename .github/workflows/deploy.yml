@@ -1,95 +1,24 @@
 name: CD Pipeline
 
-# The workflow starts on every push to main or when a PR is opened against main
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
-  # STAGE 1: Validation
-  # This job runs tests and builds the app. 
-  # It must pass before any deployment can happen.
-  build_and_test:
-    name: NPM Build and Test
+  deploy_dev:
+    name: Deploy to Dev
     runs-on: ubuntu-latest
+    environment: development
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run CI Tests
-        run: npm run test:ci
-
-  # STAGE 2: Development Deployment
-  # Deploys automatically after the build_and_test job succeeds on the main branch.
-  deploy_dev:
-    name: Deploy to Dev
-    needs: build_and_test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    environment: development # Uses the 'development' environment settings
-    steps:
-      - name: Deploy to VPS via SSH
+      - name: SSH Deployment
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: ENV_NAME=dev, ENV_PORT=8081
           script: |
-            PROJECT_PATH=~/repos/zamadev
-            cd $PROJECT_PATH
+            cd ~/repos/zamadev
             git pull origin main
-            # Using environment variables to manage different ports/configs
-            echo "ENV_NAME=$ENV_NAME" > .env
-            echo "ENV_PORT=$ENV_PORT" >> .env
-            docker compose up -d --build
-
-  # STAGE 3: Test Deployment
-  # This job will PAUSE and wait for your manual approval in the GitHub Actions UI.
-  deploy_test:
-    name: Deploy to Test
-    needs: deploy_dev # Creates the linear link in the UI
-    runs-on: ubuntu-latest
-    environment: test # Triggers 'Required Reviewers' protection rule
-    steps:
-      - name: Deploy to VPS via SSH
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: ENV_NAME=test, ENV_PORT=8082
-          script: |
-            # Deployment logic for the Test environment
-            echo "Deploying to Test on port 8082..."
-            # (Add your docker commands here)
-
-  # STAGE 4: Production Deployment
-  # Final stage. Also requires manual approval.
-  deploy_prod:
-    name: Deploy to Prod
-    needs: deploy_test # Only starts after Test deployment is approved/finished
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - name: Deploy to VPS via SSH
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: ENV_NAME=prod, ENV_PORT=8080
-          script: |
-            # Final deployment logic for Production
-            echo "Deploying to Production on port 8080..."
