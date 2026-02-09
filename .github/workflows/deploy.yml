@@ -42,8 +42,12 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd ~/repos/zamadev
+            mkdir -p ~/apps/zamadev-dev
+            cd ~/apps/zamadev-dev
+            [ -d .git ] || git clone https://github.com/jczamarripaz/zamadev.git .
             git pull origin main
+            export PORT=3000
+            export CONTAINER_NAME=zamadev-dev
             docker compose up -d --build
 
   deploy_test:
@@ -52,7 +56,20 @@ jobs:
     runs-on: ubuntu-latest
     environment: test
     steps:
-      - run: echo "Deploying to Test environment..."
+      - name: SSH Deployment
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            mkdir -p ~/apps/zamadev-test
+            cd ~/apps/zamadev-test
+            [ -d .git ] || git clone https://github.com/jczamarripaz/zamadev.git .
+            git pull origin main
+            export PORT=3001
+            export CONTAINER_NAME=zamadev-test
+            docker compose up -d --build
 
   deploy_prod:
     name: Deploy to Prod
@@ -60,4 +77,17 @@ jobs:
     runs-on: ubuntu-latest
     environment: prod
     steps:
-      - run: echo "Deploying to Production environment..."
+      - name: SSH Deployment
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            mkdir -p ~/apps/zamadev-prod
+            cd ~/apps/zamadev-prod
+            [ -d .git ] || git clone https://github.com/jczamarripaz/zamadev.git .
+            git pull origin main
+            export PORT=8080
+            export CONTAINER_NAME=zamadev-prod
+            docker compose up -d --build
