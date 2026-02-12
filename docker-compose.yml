@@ -1,10 +1,7 @@
 services:
   angular-app:
-    build:
-      context: .
-      args:
-        - ENV_CONFIGURATION=${ENV_NAME:-dev} 
-    container_name: ${CONTAINER_NAME:-zamadev-dev}
+    image: ${DOCKERHUB_USERNAME}/zamadev:${IMAGE_TAG}
+    container_name: ${CONTAINER_NAME}
     expose:
       - "80"
     networks:
