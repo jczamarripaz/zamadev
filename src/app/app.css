@@ -1,9 +1,17 @@
-.hero-full {
-    width: 100%;
-    height: 100dvh;
+body {
     margin: 0;
     padding: 0;
+    width: 100vw;
+    height: 100dvh;
     overflow: hidden;
+}
+
+.hero-full {
+    width: 100vw;
+    height: 100dvh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .full-responsive-img {
@@ -12,17 +20,4 @@
     object-fit: cover;
     object-position: center;
     display: block;
-}
-
-:host {
-    display: block;
-    margin: 0;
-}
-
-body {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    height: 100vh;
-    height: 100dvh;
 }

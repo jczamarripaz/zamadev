@@ -1,4 +1,4 @@
-name: ZamaDev CI/CD Pipeline
+name: CD Workflow
 
 on:
   push:
