@@ -35,13 +35,12 @@ jobs:
 
       - name: Build & Push Images
         run: |
-          # Build Dev
           docker build --build-arg ENV_CONFIGURATION=dev -t ${{ secrets.DOCKERHUB_USERNAME }}/zamadev:dev .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/zamadev:dev
-          # Build Test
+          
           docker build --build-arg ENV_CONFIGURATION=test -t ${{ secrets.DOCKERHUB_USERNAME }}/zamadev:test .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/zamadev:test
-          # Build Prod
+          
           docker build --build-arg ENV_CONFIGURATION=prod -t ${{ secrets.DOCKERHUB_USERNAME }}/zamadev:prod .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/zamadev:prod
 
@@ -59,14 +58,15 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ~/apps/zamadev-dev
-            # Pasamos los secrets como variables de entorno al comando
             export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
             export IMAGE_TAG=dev
             export CONTAINER_NAME=zamadev-dev
             export PORT=3000
             
-            docker compose pull
-            docker compose up -d --remove-orphans
+            docker pull ${DOCKERHUB_USERNAME}/zamadev:${IMAGE_TAG}
+            
+            docker compose up -d --force-recreate --remove-orphans
+            
             docker image prune -f
 
   deploy_test:
@@ -88,8 +88,8 @@ jobs:
             export CONTAINER_NAME=zamadev-test
             export PORT=3001
             
-            docker compose pull
-            docker compose up -d --remove-orphans
+            docker pull ${DOCKERHUB_USERNAME}/zamadev:${IMAGE_TAG}
+            docker compose up -d --force-recreate --remove-orphans
             docker image prune -f
 
   deploy_prod:
@@ -111,6 +111,6 @@ jobs:
             export CONTAINER_NAME=zamadev-prod
             export PORT=8080
             
-            docker compose pull
-            docker compose up -d --remove-orphans
+            docker pull ${DOCKERHUB_USERNAME}/zamadev:${IMAGE_TAG}
+            docker compose up -d --force-recreate --remove-orphans
             docker image prune -f
