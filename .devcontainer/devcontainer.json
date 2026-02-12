@@ -1,0 +1,32 @@
+{
+    "name": "ZamaDev Workspace",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "mounts": [
+        "source=${localWorkspaceFolderBasename}-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume"
+    ],
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "editor.defaultFormatter": "esbenp.prettier-vscode",
+                "editor.formatOnSave": true,
+                "editor.codeActionsOnSave": {
+                    "source.fixAll.eslint": "explicit"
+                }
+            },
+            "extensions": [
+                "angular.ng-template",
+                "dbaeumer.vscode-eslint",
+                "esbenp.prettier-vscode",
+                "vitest.explorer",
+                "mrmlnc.vscode-scss"
+            ]
+        }
+    },
+    "forwardPorts": [
+        4200
+    ],
+    "postCreateCommand": "npm install",
+    "remoteUser": "node"
+}
