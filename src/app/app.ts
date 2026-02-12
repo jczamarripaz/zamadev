@@ -6,7 +6,7 @@ import { environment } from '../environments/environment';
   selector: 'app-root',
   imports: [RouterOutlet],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrls: ['./app.scss'],
 })
 export class App {
   protected readonly title = signal('zamadev');
